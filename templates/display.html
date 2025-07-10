@@ -1,39 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Kijelző</title>
-  <meta http-equiv="refresh" content="5"> <!-- Automatikus frissítés 5 mp-enként -->
-  <style>
-    .section {
-      margin-bottom: 30px;
-    }
-    .number {
-      display: inline-block;
-      margin: 5px;
-      padding: 15px;
-      font-size: 24px;
-      border: 2px solid #000;
-      border-radius: 8px;
-      background-color: #f2f2f2;
-    }
-    .number.called {
-      background-color: #28a745;
-      color: white;
-      font-weight: bold;
-    }
-  </style>
+    <title>Kijelző</title>
+    <meta http-equiv="refresh" content="5">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f6f6;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        .section {
+            margin: 30px auto;
+            width: 80%;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .number {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        .called {
+            background-color: #28a745; /* zöld */
+        }
+        .waiting {
+            background-color: #dc3545; /* piros */
+        }
+    </style>
 </head>
 <body>
-  <h1>Várakozók</h1>
-  {% for option, numbers in data.items() %}
-    <div class="section">
-      <h2>{{ option }}</h2>
-      {% for number in numbers %}
-        <div class="number {% if number in called %}called{% endif %}">
-          {{ number }}
+    <h1>Várakozók kijelző</h1>
+
+    {% for option, numbers in data.items() %}
+        <div class="section">
+            <h2>{{ option }}</h2>
+            <div>
+                {% if numbers %}
+                    {% for number in numbers %}
+                        {% if number in called %}
+                            <div class="number called">{{ number }}</div>
+                        {% else %}
+                            <div class="number waiting">{{ number }}</div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p>Nincs adat.</p>
+                {% endif %}
+            </div>
         </div>
-      {% endfor %}
-    </div>
-  {% endfor %}
+    {% endfor %}
 </body>
 </html>

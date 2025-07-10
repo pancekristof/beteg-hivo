@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-# Előre definiált állomások
+# Szakrendelések és hozzájuk tartozó sorszámok
 data = {
     "Bőrgyógyászat": [],
     "Szemészet": [],
@@ -12,28 +12,28 @@ data = {
 # Behívott sorszámok
 called_numbers = []
 
-# Input oldal - beteg beléptetés
+# Input oldal – beteg belépés
 @app.route('/input', methods=['GET', 'POST'])
 def input_page():
     if request.method == 'POST':
         option = request.form['option']
         number = request.form['number']
-        if option in data:
+        if option in data and number:
             data[option].append(number)
         return redirect('/input')
     return render_template('input.html', options=list(data.keys()))
 
-# Admin oldal - hívásra alkalmas sorszámok
+# Admin oldal – sorszám behívás
 @app.route('/admin')
 def admin_page():
-    return render_template('admin.html', data=data)
+    return render_template('admin.html', data=data, called=called_numbers)
 
-# Kijelző oldal - sorszámok megjelenítése
+# Kijelző oldal – megjelenítés
 @app.route('/display')
 def display_page():
     return render_template('display.html', data=data, called=called_numbers)
 
-# Behívás - admin oldalról történik
+# Behívás kezelése
 @app.route('/call')
 def call_number():
     option = request.args.get('option')
@@ -42,6 +42,6 @@ def call_number():
         called_numbers.append(number)
     return '', 204
 
-# Fejlesztési mód helyi futtatásra
+# Lokális futtatáshoz
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,57 +1,80 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <title>Beteghívó - Admin</title>
-    <link rel="stylesheet" href="/static/style.css" />
+    <title>Admin – Behívás</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .option, .number {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #eee;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .option.selected {
+            background-color: #cce5ff;
+            border-color: #3399ff;
+        }
+        .number:hover {
+            background-color: #d4edda;
+        }
+    </style>
 </head>
 <body>
-    <h1>Admin felület - Sorszám behívása</h1>
+    <h1>Admin felület – Behívás</h1>
 
-    <label for="option">Rendelő:</label>
-    <select id="option">
-        {% for opt in options %}
-        <option value="{{ opt }}">{{ opt }}</option>
+    <h3>Válassz szakrendelést:</h3>
+    <div id="options">
+        {% for option in data %}
+            <div class="option" onclick="selectOption('{{ option }}')">{{ option }}</div>
         {% endfor %}
-    </select>
+    </div>
 
-    <label for="number">Sorszám:</label>
-    <input type="text" id="number" />
+    <div id="number-list" style="margin-top: 20px;"></div>
 
-    <button id="callBtn">Behívás</button>
-
-    <p id="status"></p>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
     <script>
-        const callBtn = document.getElementById('callBtn');
-        const optionSelect = document.getElementById('option');
-        const numberInput = document.getElementById('number');
-        const status = document.getElementById('status');
+        let selectedOption = null;
+        const data = {{ data|tojson }};
+        const called = {{ called|tojson }};
 
-        const socket = io();
+        function selectOption(option) {
+            selectedOption = option;
+            document.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.option').forEach(el => {
+                if (el.textContent === option) el.classList.add('selected');
+            });
 
-        callBtn.addEventListener('click', async () => {
-            const option = optionSelect.value;
-            const number = numberInput.value.trim();
-            if (!number) {
-                status.textContent = 'Adj meg egy sorszámot!';
+            // Frissítjük a hozzá tartozó sorszámokat
+            const numberList = document.getElementById('number-list');
+            numberList.innerHTML = `<h3>${option} sorszámai:</h3>`;
+
+            if (data[option].length === 0) {
+                numberList.innerHTML += '<p>Nincs rögzített sorszám.</p>';
                 return;
             }
 
-            const res = await fetch('/call_number', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ option, number })
+            data[option].forEach(number => {
+                if (!called.includes(number)) {
+                    const btn = document.createElement('div');
+                    btn.className = 'number';
+                    btn.textContent = number;
+                    btn.onclick = () => callNumber(option, number);
+                    numberList.appendChild(btn);
+                }
             });
-            const data = await res.json();
-            if (data.status === 'ok') {
-                status.textContent = 'Sorszám behívva!';
-                numberInput.value = '';
-            } else {
-                status.textContent = 'Hiba: ' + data.message;
-            }
-        });
+        }
+
+        function callNumber(option, number) {
+            fetch(`/call?option=${option}&number=${number}`)
+                .then(() => {
+                    alert(`Sorszám ${number} behívva a(z) ${option} rendelésre.`);
+                    location.reload();
+                });
+        }
     </script>
 </body>
 </html>
