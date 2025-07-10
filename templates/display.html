@@ -1,42 +1,39 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <title>Beteghívó - Kijelző</title>
-    <link rel="stylesheet" href="/static/style.css" />
-    <style>
-        .called {
-            color: green;
-            font-weight: bold;
-        }
-    </style>
+  <title>Kijelző</title>
+  <meta http-equiv="refresh" content="5"> <!-- Automatikus frissítés 5 mp-enként -->
+  <style>
+    .section {
+      margin-bottom: 30px;
+    }
+    .number {
+      display: inline-block;
+      margin: 5px;
+      padding: 15px;
+      font-size: 24px;
+      border: 2px solid #000;
+      border-radius: 8px;
+      background-color: #f2f2f2;
+    }
+    .number.called {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <h1>Várakozó sorszámok</h1>
-    <div id="lists"></div>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
-    <script>
-        const socket = io();
-        const lists = document.getElementById('lists');
-
-        function updateDisplay(data) {
-            lists.innerHTML = '';
-            for (const option in data) {
-                const numbers = data[option];
-                const div = document.createElement('div');
-                div.innerHTML = `<h2>${option}</h2><p>${numbers.length} várakozó</p>`;
-                lists.appendChild(div);
-            }
-        }
-
-        socket.on('update', (data) => {
-            updateDisplay(data);
-        });
-
-        socket.on('call', ({ option, number }) => {
-            alert(`Hívják: ${option} - ${number}`);
-        });
-    </script>
+  <h1>Várakozók</h1>
+  {% for option, numbers in data.items() %}
+    <div class="section">
+      <h2>{{ option }}</h2>
+      {% for number in numbers %}
+        <div class="number {% if number in called %}called{% endif %}">
+          {{ number }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
 </body>
 </html>

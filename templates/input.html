@@ -1,53 +1,53 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <title>Beteghívó - Bemenet</title>
-    <link rel="stylesheet" href="/static/style.css" />
+  <title>Beteg Érkezés</title>
+  <style>
+    .option-btn {
+      display: inline-block;
+      padding: 15px;
+      margin: 10px;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: white;
+    }
+    .option-btn.selected {
+      background-color: #007BFF;
+      color: white;
+    }
+    #step-2 {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+  <script>
+    function selectOption(option) {
+      document.getElementById('selected_option').value = option;
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('btn-' + option).classList.add('selected');
+      document.getElementById('step-2').style.display = 'block';
+    }
+  </script>
 </head>
 <body>
-    <h1>Sorszám felvitele</h1>
-    <form id="numberForm">
-        <label for="option">Válassz rendelőt:</label>
-        <select id="option" name="option">
-            {% for opt in options %}
-            <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-        </select><br/><br/>
+  <h2>Válassz szakrendelést</h2>
+  <form method="POST">
+    <div>
+      {% for option in options %}
+        <div id="btn-{{ option }}" class="option-btn" onclick="selectOption('{{ option }}')">
+          {{ option }}
+        </div>
+      {% endfor %}
+    </div>
 
-        <label for="number">Sorszám:</label>
-        <input type="text" id="number" name="number" required /><br/><br/>
-
-        <button type="submit">Felvitel</button>
-    </form>
-
-    <p id="status"></p>
-
-    <script>
-        const form = document.getElementById('numberForm');
-        const status = document.getElementById('status');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const option = document.getElementById('option').value;
-            const number = document.getElementById('number').value.trim();
-            if (!number) {
-                status.textContent = "Adj meg egy sorszámot!";
-                return;
-            }
-            const res = await fetch('/add_number', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ option, number })
-            });
-            const data = await res.json();
-            if (data.status === 'ok') {
-                status.textContent = "Sorszám felvéve!";
-                form.reset();
-            } else {
-                status.textContent = "Hiba: " + data.message;
-            }
-        });
-    </script>
+    <div id="step-2">
+      <h3>Írd be a sorszámod</h3>
+      <input type="hidden" name="option" id="selected_option" required>
+      <input type="text" name="number" placeholder="Sorszám" required>
+      <br><br>
+      <button type="submit">Rögzítés</button>
+    </div>
+  </form>
 </body>
 </html>
