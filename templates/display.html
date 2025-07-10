@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8" />
+    <title>Beteghívó - Kijelző</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+        .called {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Várakozó sorszámok</h1>
+    <div id="lists"></div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        const lists = document.getElementById('lists');
+
+        function updateDisplay(data) {
+            lists.innerHTML = '';
+            for (const option in data) {
+                const numbers = data[option];
+                const div = document.createElement('div');
+                div.innerHTML = `<h2>${option}</h2><p>${numbers.length} várakozó</p>`;
+                lists.appendChild(div);
+            }
+        }
+
+        socket.on('update', (data) => {
+            updateDisplay(data);
+        });
+
+        socket.on('call', ({ option, number }) => {
+            alert(`Hívják: ${option} - ${number}`);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8" />
+    <title>Beteghívó - Admin</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>Admin felület - Sorszám behívása</h1>
+
+    <label for="option">Rendelő:</label>
+    <select id="option">
+        {% for opt in options %}
+        <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="number">Sorszám:</label>
+    <input type="text" id="number" />
+
+    <button id="callBtn">Behívás</button>
+
+    <p id="status"></p>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+    <script>
+        const callBtn = document.getElementById('callBtn');
+        const optionSelect = document.getElementById('option');
+        const numberInput = document.getElementById('number');
+        const status = document.getElementById('status');
+
+        const socket = io();
+
+        callBtn.addEventListener('click', async () => {
+            const option = optionSelect.value;
+            const number = numberInput.value.trim();
+            if (!number) {
+                status.textContent = 'Adj meg egy sorszámot!';
+                return;
+            }
+
+            const res = await fetch('/call_number', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ option, number })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                status.textContent = 'Sorszám behívva!';
+                numberInput.value = '';
+            } else {
+                status.textContent = 'Hiba: ' + data.message;
+            }
+        });
+    </script>
+</body>
+</html>

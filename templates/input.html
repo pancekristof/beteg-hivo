@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8" />
+    <title>Beteghívó - Bemenet</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>Sorszám felvitele</h1>
+    <form id="numberForm">
+        <label for="option">Válassz rendelőt:</label>
+        <select id="option" name="option">
+            {% for opt in options %}
+            <option value="{{ opt }}">{{ opt }}</option>
+            {% endfor %}
+        </select><br/><br/>
+
+        <label for="number">Sorszám:</label>
+        <input type="text" id="number" name="number" required /><br/><br/>
+
+        <button type="submit">Felvitel</button>
+    </form>
+
+    <p id="status"></p>
+
+    <script>
+        const form = document.getElementById('numberForm');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const option = document.getElementById('option').value;
+            const number = document.getElementById('number').value.trim();
+            if (!number) {
+                status.textContent = "Adj meg egy sorszámot!";
+                return;
+            }
+            const res = await fetch('/add_number', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ option, number })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                status.textContent = "Sorszám felvéve!";
+                form.reset();
+            } else {
+                status.textContent = "Hiba: " + data.message;
+            }
+        });
+    </script>
+</body>
+</html>
